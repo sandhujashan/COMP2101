@@ -9,8 +9,6 @@
 #   External IP     : 1.2.3.4
 #   External Name   : some.name.from.our.isp
 
-echo 'Jashanpreet Kaur - BASH LAB 3'
-
 # Task 1: Clean up this script by moving the commands that generate the output to separate lines
 #         that put each command's output into variables. Once you have that done, Use those variables
 #         in the output section at the end of the script. If the commands included in this script
@@ -37,20 +35,6 @@ echo 'Jashanpreet Kaur - BASH LAB 3'
 #
 #   Your variable names should be sensible names that describe what is in them
 #   Taking complex commands and splitting them into separate simpler pieces makes them easier to read, understand, debug, and extend or modify
-
-cmd1=$(ip a |awk '/: e/{gsub(/:/,"");print $2}')
-lanAddr=$(ip a s $cmd1 |awk '/inet /{gsub(/\/.*/,"");print $2}')
-lanHostName=$(getent hosts $lanAddr | awk '{print $2}')
-extAddr=$(curl -s icanhazip.com)
-extName=$(getent hosts $extAddr | awk '{print $2}')
-
-cat <<EOF
-Hostname        : $(hostname)
-LAN Address     : $lanAddr
-LAN Hostname    : $lanHostName
-External IP     : $extAddr
-External Name   : $extName
-EOF
 
 # Task 2: Add variables for the default router's name and IP address.
 #         Add a name for the router's IP address to your /etc/hosts file.
@@ -91,10 +75,25 @@ EOF
 #   External IP     : $myExternalIP
 #   External Name   : $myExternalName
 
-routAddr=$(echo $lanAddr | awk -F "." '{print $1 "." $2 "." $3 ".1"}')
-routName=$(getent hosts $routAddr | awk '{print $2}')
+# My Solution
+rtr_add=$(ip route show | awk '/default/ {print $3}')
+rtr_name=$(getent hosts $rtr_add|awk '{print $2}')
+
+myhost=$(hostname)
+interface=$(ip a | awk '/: e/{gsub(/:/,"");print $2}')
+lan_ip=$(ip a s $interface |awk '/inet /{gsub(/\/.*/,"");print $2}')
+lanname=$(getent hosts $lan_ip |awk '{print $2}')
+ext_ip=$(curl -s icanhazip.com)
+ext_name=$(getent hosts $ext_ip |awk '{print $2}')
+
+
 
 cat <<EOF
-Router Address  : $routAddr
-Router Hostname : $routName
+Hostname        : $myhost
+LAN Address     : $lan_ip
+LAN Hostname    : $lanname
+External IP     : $ext_ip
+External Name   : $ext_name
+Router Address  : $rtr_add
+Router Hostname : $rtr_name
 EOF
